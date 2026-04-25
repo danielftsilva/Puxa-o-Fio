@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#2c1810">
+  <title>Mapa do Tesouro</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --parchment: #f4e4c1;
+      --parchment-dark: #e8d5a3;
+      --ink: #2c1810;
+      --ink-light: #5c3a1e;
+      --red: #8b1a1a;
+      --gold: #b8860b;
+      --sepia: #704214;
+    }
+
+    body {
+      background: #1a0f07;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Cinzel', serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── PARCHMENT CONTAINER ─── */
+    .parchment {
+      background: var(--parchment);
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(180,130,70,0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(160,110,50,0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(200,160,90,0.1) 0%, transparent 70%);
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 80px rgba(120,80,30,0.2);
+    }
+
+    /* Torn edges top/bottom */
+    .parchment::before, .parchment::after {
+      content: '';
+      display: block;
+      height: 12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12'%3E%3Cpath d='M0,0 Q5,12 10,6 Q15,0 20,8 Q25,12 30,4 Q35,0 40,10 Q45,12 50,5 Q55,0 60,9 Q65,12 70,3 Q75,0 80,11 Q85,12 90,5 Q95,0 100,8 L100,12 L0,12Z' fill='%23f4e4c1'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+      position: absolute;
+      left: 0; right: 0;
+    }
+    .parchment::before { top: 0; transform: scaleY(-1); }
+    .parchment::after { bottom: 0; }
+
+    /* Stain overlays */
+    .stain {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+    .stain-1 { width: 120px; height: 90px; background: #704214; top: 80px; right: 20px; transform: rotate(20deg); }
+    .stain-2 { width: 80px; height: 60px; background: #5c3a1e; bottom: 200px; left: 10px; transform: rotate(-15deg); }
+    .stain-3 { width: 50px; height: 40px; background: #8b6914; top: 300px; left: 30px; }
+
+    /* ─── HEADER ─── */
+    .header {
+      text-align: center;
+      padding: 12px 0 8px;
+      border-bottom: 2px solid var(--ink-light);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .header::before, .header::after {
+      content: '✦';
+      color: var(--gold);
+      font-size: 14px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .header::before { left: 0; }
+    .header::after { right: 0; }
+
+    .title-main {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 22px;
+      color: var(--ink);
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 0 rgba(180,120,40,0.4);
+      line-height: 1.2;
+    }
+    .title-sub {
+      font-size: 11px;
+      color: var(--sepia);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ─── MAP SVG AREA ─── */
+    .map-container {
+      background: var(--parchment-dark);
+      border: 2px solid var(--ink-light);
+      border-radius: 4px;
+      padding: 8px;
+      margin: 12px 0;
+      position: relative;
+      box-shadow: inset 0 2px 8px rgba(100,60,20,0.2), 2px 2px 0 rgba(100,60,20,0.3);
+    }
+
+    .map-container svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ─── PROGRESS INDICATOR ─── */
+    .progress-section {
+      margin: 12px 0;
+      text-align: center;
+    }
+    .progress-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--sepia);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .checkpoints-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+    }
+    .cp-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--ink-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-light);
+      background: var(--parchment);
+      transition: all 0.4s ease;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+    }
+    .cp-dot.active {
+      border-color: var(--red);
+      color: var(--red);
+      background: #fff8ee;
+      box-shadow: 0 0 0 3px rgba(139,26,26,0.15);
+      animation: pulse 2s infinite;
+    }
+    .cp-dot.done {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: #fffae8;
+    }
+    .cp-line {
+      width: 40px;
+      height: 2px;
+      background: var(--ink-light);
+      opacity: 0.4;
+    }
+    .cp-line.done { background: var(--gold); opacity: 1; }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(139,26,26,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(139,26,26,0.08); }
+    }
+
+    /* ─── CHECKPOINT CARDS ─── */
+    .checkpoint-card {
+      border: 1.5px solid var(--ink-light);
+      border-radius: 4px;
+      padding: 14px;
+      margin: 10px 0;
+      background: rgba(255,250,235,0.6);
+      display: none;
+      box-shadow: 2px 2px 0 rgba(100,60,20,0.2);
+    }
+    .checkpoint-card.visible { display: block; }
+    .checkpoint-card.locked { opacity: 0.45; pointer-events: none; }
+
+    .cp-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cp-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--red);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cp-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 1px;
+    }
+    .cp-location {
+      font-size: 10px;
+      color: var(--sepia);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .cp-desc {
+      font-family: Georgia, serif;
+      font-size: 13px;
+      color: var(--ink-light);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(90,50,20,0.3);
+    }
+    .cp-hint {
+      font-size: 11px;
+      color: var(--sepia);
+      font-style: italic;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+    .cp-hint span { font-style: normal; }
+
+    .code-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .code-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid var(--ink-light);
+      border-radius: 4px;
+      background: rgba(255,253,245,0.9);
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .code-input:focus { border-color: var(--red); }
+    .code-input::placeholder { letter-spacing: 1px; font-size: 11px; font-weight: 400; color: #aaa; }
+
+    .btn-confirm {
+      padding: 10px 16px;
+      background: var(--ink);
+      color: var(--parchment);
+      border: none;
+      border-radius: 4px;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-confirm:active { background: var(--red); }
+
+    .cp-feedback {
+      margin-top: 8px;
+      font-size: 12px;
+      font-family: Georgia, serif;
+      font-style: italic;
+      min-height: 18px;
+      transition: all 0.3s;
+    }
+    .cp-feedback.error { color: var(--red); }
+    .cp-feedback.success { color: #2d6a2d; font-weight: 700; }
+
+    .cp-done-badge {
+      text-align: center;
+      padding: 8px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    /* ─── FINAL REVEAL ─── */
+    .final-reveal {
+      display: none;
+      text-align: center;
+      padding: 20px 10px;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: rgba(255,250,230,0.8);
+      margin: 16px 0;
+      box-shadow: 0 0 20px rgba(184,134,11,0.2);
+    }
+    .final-reveal.visible { display: block; }
+    .final-icon { font-size: 48px; margin-bottom: 8px; }
+    .final-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 18px;
+      color: var(--red);
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+    .final-text {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-light);
+      line-height: 1.6;
+    }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      text-align: center;
+      color: var(--gold);
+      font-size: 13px;
+      letter-spacing: 6px;
+      margin: 8px 0;
+      opacity: 0.7;
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      text-align: center;
+      font-size: 9px;
+      color: var(--sepia);
+      opacity: 0.5;
+      letter-spacing: 2px;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(90,50,20,0.2);
+    }
+  </style>
+</head>
+<body>
+<div class="parchment">
+  <div class="stain stain-1"></div>
+  <div class="stain stain-2"></div>
+  <div class="stain stain-3"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title-main">Mapa do Tesouro</div>
+    <div class="title-sub">Quinta do Conde · Anno Domini MMXXVI</div>
+  </div>
+
+  <!-- MAP SVG -->
+  <div class="map-container">
+    <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+      <!-- Parchment texture bg -->
+      <rect width="360" height="260" fill="#e8d5a3" rx="2"/>
+
+      <!-- Grid lines (faint) -->
+      <g stroke="#c4a86b" stroke-width="0.3" opacity="0.4">
+        <line x1="0" y1="65" x2="360" y2="65"/>
+        <line x1="0" y1="130" x2="360" y2="130"/>
+        <line x1="0" y1="195" x2="360" y2="195"/>
+        <line x1="90" y1="0" x2="90" y2="260"/>
+        <line x1="180" y1="0" x2="180" y2="260"/>
+        <line x1="270" y1="0" x2="270" y2="260"/>
+      </g>
+
+      <!-- Compass rose (top left) -->
+      <g transform="translate(34,34)">
+        <circle cx="0" cy="0" r="18" fill="none" stroke="#704214" stroke-width="1" opacity="0.6"/>
+        <circle cx="0" cy="0" r="4" fill="#704214" opacity="0.6"/>
+        <!-- N -->
+        <polygon points="0,-18 -4,-8 0,-12 4,-8" fill="#8b1a1a" opacity="0.8"/>
+        <!-- S -->
+        <polygon points="0,18 -4,8 0,12 4,8" fill="#704214" opacity="0.5"/>
+        <!-- E -->
+        <polygon points="18,0 8,-4 12,0 8,4" fill="#704214" opacity="0.5"/>
+        <!-- W -->
+        <polygon points="-18,0 -8,-4 -12,0 -8,4" fill="#704214" opacity="0.5"/>
+        <text x="0" y="-21" text-anchor="middle" font-size="8" fill="#8b1a1a" font-family="Cinzel,serif" font-weight="700">N</text>
+      </g>
+
+      <!-- Street labels (faint) -->
+      <text x="200" y="38" font-size="7" fill="#704214" opacity="0.5" font-family="Georgia,serif" transform="rotate(-8,200,38)">R. João XXIII</text>
+      <text x="148" y="110" font-size="7" fill="#704214" opacity="0.5" font-family="Georgia,serif" transform="rotate(80,148,110)">R. Padre Américo</text>
+
+      <!-- Wooded area (bottom left) -->
+      <ellipse cx="75" cy="215" rx="65" ry="38" fill="#c8b87a" opacity="0.35"/>
+      <g opacity="0.5">
+        <text x="28" y="200" font-size="14" fill="#5c7a3e">🌳</text>
+        <text x="48" y="222" font-size="11" fill="#5c7a3e">🌲</text>
+        <text x="68" y="208" font-size="13" fill="#5c7a3e">🌳</text>
+        <text x="88" y="224" font-size="10" fill="#5c7a3e">🌲</text>
+        <text x="105" y="210" font-size="12" fill="#5c7a3e">🌳</text>
+      </g>
+
+      <!-- Football pitch landmark -->
+      <rect x="22" y="168" width="42" height="26" fill="none" stroke="#704214" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.6" rx="2"/>
+      <text x="43" y="179" text-anchor="middle" font-size="6" fill="#704214" opacity="0.7" font-family="Georgia,serif">Ringue</text>
+      <text x="43" y="188" text-anchor="middle" font-size="6" fill="#704214" opacity="0.7" font-family="Georgia,serif">de Futebol</text>
+
+      <!-- Houses (top right area - start) -->
+      <g opacity="0.55">
+        <rect x="278" y="28" width="16" height="14" fill="#c4a86b" stroke="#704214" stroke-width="0.8"/>
+        <polygon points="278,28 294,28 286,20" fill="#8b6914" stroke="#704214" stroke-width="0.8"/>
+        <rect x="300" y="32" width="14" height="12" fill="#c4a86b" stroke="#704214" stroke-width="0.8"/>
+        <polygon points="300,32 314,32 307,24" fill="#8b6914" stroke="#704214" stroke-width="0.8"/>
+        <rect x="318" y="30" width="16" height="13" fill="#c4a86b" stroke="#704214" stroke-width="0.8"/>
+        <polygon points="318,30 334,30 326,22" fill="#8b6914" stroke="#704214" stroke-width="0.8"/>
+      </g>
+
+      <!-- THE ROUTE (red dashed line - matches the photo path) -->
+      <!-- Start: top right (home), goes left along R João XXIII, then down, then into woods -->
+      <path d="M 295,42 Q 260,42 235,48 Q 200,55 185,68 Q 170,82 168,95 Q 166,110 155,118 Q 144,126 138,140 Q 130,158 115,175 Q 100,192 82,208"
+            fill="none" stroke="#8b1a1a" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.85"/>
+
+      <!-- Checkpoint 1 — near start (after first bend) -->
+      <g id="map-cp1" class="map-cp" data-cp="1" style="cursor:pointer">
+        <circle cx="200" cy="60" r="10" fill="#fff8ee" stroke="#8b1a1a" stroke-width="1.5"/>
+        <text x="200" y="64" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">I</text>
+        <circle cx="200" cy="60" r="14" fill="none" stroke="#8b1a1a" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+      </g>
+
+      <!-- Checkpoint 2 — ringue area -->
+      <g id="map-cp2" class="map-cp" data-cp="2" style="cursor:pointer">
+        <circle cx="135" cy="148" r="10" fill="#fff8ee" stroke="#8b1a1a" stroke-width="1.5"/>
+        <text x="135" y="152" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">II</text>
+        <circle cx="135" cy="148" r="14" fill="none" stroke="#8b1a1a" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+      </g>
+
+      <!-- X marks the spot -->
+      <g id="map-x" style="cursor:pointer">
+        <circle cx="82" cy="208" r="13" fill="#fffae0" stroke="#b8860b" stroke-width="2"/>
+        <text x="82" y="213" text-anchor="middle" font-size="16" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">✕</text>
+        <circle cx="82" cy="208" r="18" fill="none" stroke="#b8860b" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>
+      </g>
+
+      <!-- START flag -->
+      <g transform="translate(295,42)">
+        <line x1="0" y1="0" x2="0" y2="-18" stroke="#704214" stroke-width="1.5"/>
+        <polygon points="0,-18 12,-14 0,-10" fill="#8b1a1a"/>
+        <text x="4" y="10" font-size="7" fill="#704214" font-family="Georgia,serif" font-style="italic">início</text>
+      </g>
+
+      <!-- Heart + D&C label near X -->
+      <text x="82" y="234" text-anchor="middle" font-size="9" fill="#8b1a1a" font-family="Georgia,serif" font-style="italic">❤ D+C ❤</text>
+
+      <!-- Scale bar -->
+      <g transform="translate(260,240)">
+        <line x1="0" y1="0" x2="60" y2="0" stroke="#704214" stroke-width="1.2" opacity="0.6"/>
+        <line x1="0" y1="-3" x2="0" y2="3" stroke="#704214" stroke-width="1" opacity="0.6"/>
+        <line x1="60" y1="-3" x2="60" y2="3" stroke="#704214" stroke-width="1" opacity="0.6"/>
+        <text x="30" y="-5" text-anchor="middle" font-size="6" fill="#704214" opacity="0.6" font-family="Georgia,serif">≈ 400m</text>
+      </g>
+
+      <!-- Map border ornament -->
+      <rect x="2" y="2" width="356" height="256" fill="none" stroke="#704214" stroke-width="1.5" opacity="0.4" rx="2"/>
+      <rect x="5" y="5" width="350" height="250" fill="none" stroke="#c4a86b" stroke-width="0.5" opacity="0.3" rx="1"/>
+    </svg>
+  </div>
+
+  <!-- PROGRESS DOTS -->
+  <div class="progress-section">
+    <div class="progress-label">Progresso da Missão</div>
+    <div class="checkpoints-row">
+      <div class="cp-dot active" id="dot-1" onclick="scrollToCheckpoint(1)">I</div>
+      <div class="cp-line" id="line-1"></div>
+      <div class="cp-dot" id="dot-2" onclick="scrollToCheckpoint(2)">II</div>
+      <div class="cp-line" id="line-2"></div>
+      <div class="cp-dot" id="dot-3" onclick="scrollToCheckpoint(3)">✕</div>
+    </div>
+  </div>
+
+  <div class="divider">· · · ✦ · · ·</div>
+
+  <!-- CHECKPOINT 1 -->
+  <div class="checkpoint-card visible" id="card-1">
+    <div class="cp-card-header">
+      <div class="cp-number">I</div>
+      <div>
+        <div class="cp-title">Checkpoint I</div>
+        <div class="cp-location" id="loc-1">—</div>
+      </div>
+    </div>
+    <div class="cp-desc" id="desc-1">A carregar...</div>
+    <div class="cp-hint">Pista: "<span id="hint-1">...</span>"</div>
+    <div class="code-input-row">
+      <input class="code-input" id="input-1" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn-confirm" onclick="submitCode(1)">✓</button>
+    </div>
+    <div class="cp-feedback" id="feedback-1"></div>
+  </div>
+
+  <!-- CHECKPOINT 2 -->
+  <div class="checkpoint-card locked" id="card-2">
+    <div class="cp-card-header">
+      <div class="cp-number">II</div>
+      <div>
+        <div class="cp-title">Checkpoint II</div>
+        <div class="cp-location" id="loc-2">—</div>
+      </div>
+    </div>
+    <div class="cp-desc" id="desc-2">Completa o checkpoint anterior para desbloquear.</div>
+    <div class="cp-hint" style="display:none">Pista: "<span id="hint-2">...</span>"</div>
+    <div class="code-input-row">
+      <input class="code-input" id="input-2" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn-confirm" onclick="submitCode(2)">✓</button>
+    </div>
+    <div class="cp-feedback" id="feedback-2"></div>
+  </div>
+
+  <!-- CHECKPOINT 3 (X) -->
+  <div class="checkpoint-card locked" id="card-3">
+    <div class="cp-card-header">
+      <div class="cp-number">✕</div>
+      <div>
+        <div class="cp-title">O Tesouro</div>
+        <div class="cp-location" id="loc-3">—</div>
+      </div>
+    </div>
+    <div class="cp-desc" id="desc-3">Completa os checkpoints anteriores para desbloquear.</div>
+    <div class="cp-hint" style="display:none">Pista: "<span id="hint-3">...</span>"</div>
+    <div class="code-input-row">
+      <input class="code-input" id="input-3" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn-confirm" onclick="submitCode(3)">✓</button>
+    </div>
+    <div class="cp-feedback" id="feedback-3"></div>
+  </div>
+
+  <!-- FINAL REVEAL -->
+  <div class="final-reveal" id="final-reveal">
+    <div class="final-icon">🗝️</div>
+    <div class="final-title">Missão Completa</div>
+    <div class="final-text">
+      Encontraste o que procuravas.<br><br>
+      Agora escava.<br><br>
+      O que está lá dentro abre algo que ainda não viste.<br>
+      Guarda a chave. Esta noite vais precisar dela.<br><br>
+      <em>— Pira</em>
+    </div>
+  </div>
+
+  <div class="footer">
+    PUXA O FIO · MISSÃO CLASSIFICADA · 2026
+  </div>
+</div>
+
+<script>
+  const state = { current: 1, completed: [] };
+
+  // Load checkpoint info from API
+  async function loadCheckpoint(n) {
+    try {
+      const r = await fetch(`/api/checkpoint_info/${n}`);
+      const d = await r.json();
+      document.getElementById(`loc-${n}`).textContent = d.location;
+      document.getElementById(`desc-${n}`).textContent = d.description;
+      document.getElementById(`hint-${n}`).textContent = d.hint;
+    } catch(e) {}
+  }
+
+  async function submitCode(n) {
+    const input = document.getElementById(`input-${n}`);
+    const feedback = document.getElementById(`feedback-${n}`);
+    const code = input.value.trim();
+    if (!code) return;
+
+    feedback.textContent = '...';
+    feedback.className = 'cp-feedback';
+
+    try {
+      const r = await fetch('/api/checkpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkpoint: n, code })
+      });
+      const d = await r.json();
+
+      if (d.success) {
+        feedback.textContent = d.message;
+        feedback.className = 'cp-feedback success';
+        markDone(n);
+        if (d.next) setTimeout(() => unlockNext(d.next), 800);
+        else setTimeout(() => showFinal(), 800);
+      } else {
+        feedback.textContent = d.error;
+        feedback.className = 'cp-feedback error';
+        input.value = '';
+        input.focus();
+      }
+    } catch(e) {
+      feedback.textContent = 'Erro de ligação. Tenta outra vez.';
+      feedback.className = 'cp-feedback error';
+    }
+  }
+
+  function markDone(n) {
+    const card = document.getElementById(`card-${n}`);
+    card.classList.remove('visible');
+    card.classList.add('locked');
+    // Show done badge
+    const badge = document.createElement('div');
+    badge.className = 'cp-done-badge';
+    badge.textContent = '✦ Checkpoint Completo ✦';
+    card.innerHTML = '';
+    card.appendChild(badge);
+    card.classList.remove('locked');
+    card.classList.add('visible');
+
+    // Update dot
+    const dot = document.getElementById(`dot-${n}`);
+    dot.classList.remove('active');
+    dot.classList.add('done');
+    if (n < 3) {
+      document.getElementById(`line-${n}`).classList.add('done');
+    }
+  }
+
+  function unlockNext(n) {
+    const card = document.getElementById(`card-${n}`);
+    card.classList.remove('locked');
+    card.classList.add('visible');
+    const hintEl = card.querySelector('.cp-hint');
+    if (hintEl) hintEl.style.display = 'block';
+    const dot = document.getElementById(`dot-${n}`);
+    dot.classList.add('active');
+    loadCheckpoint(n);
+    state.current = n;
+    setTimeout(() => scrollToCheckpoint(n), 300);
+  }
+
+  function scrollToCheckpoint(n) {
+    const card = document.getElementById(`card-${n}`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showFinal() {
+    const el = document.getElementById('final-reveal');
+    el.classList.add('visible');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Confetti-like effect with emojis
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        const e = document.createElement('div');
+        e.textContent = ['⭐','✨','🗝️','💛','✦'][i];
+        e.style.cssText = `position:fixed;font-size:24px;top:-30px;left:${10+i*20}%;animation:fall 2s forwards;pointer-events:none;z-index:999`;
+        document.body.appendChild(e);
+        setTimeout(() => e.remove(), 2500);
+      }, i * 200);
+    }
+  }
+
+  // Init: load first checkpoint
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCheckpoint(1);
+    // Handle Enter key
+    [1,2,3].forEach(n => {
+      document.getElementById(`input-${n}`)
+        .addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(n); });
+    });
+  });
+</script>
+
+<style>
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+</style>
+</body>
+</html>
