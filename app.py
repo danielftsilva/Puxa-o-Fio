@@ -22,7 +22,7 @@ CHECKPOINTS = {
     },
     3: {
         "code": "10",
-        "hint": "Algumas pessoas chamam-lhe 'arte'...",
+        "hint": "Algumas pessoas chamam-lhe 'arte'; outras, 'vandalismo'...",
         "location": "Ringue de Futebol",
         "description": "Procura o código perto do ringue.",
         "success_msg": "Quase lá..."
