@@ -21,7 +21,7 @@ CHECKPOINTS = {
         "success_msg": "Checkpoint 2 desbloqueado! Quase lá..."
     },
     3: {
-        "code": "DC",  # <- muda este código — ela vai ver o coração na árvore
+        "code": "D+C",  # <- muda este código — ela vai ver o coração na árvore
         "hint": "Dois corações, uma só árvore...",
         "location": "A Arvore",
         "description": "Encontraste o X. Procura a árvore com o coração gravado. O código está lá.",
