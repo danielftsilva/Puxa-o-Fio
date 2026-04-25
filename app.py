@@ -7,7 +7,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "puxa-o-fio-2024")
 # Secret codes for each checkpoint — change these before deploying
 CHECKPOINTS = {
     1: {
-        "code": "VARANDA",
+        "code": "PA",
         "hint": "Leva o objeto que está na varanda...",
         "location": "Início",
         "description": "Antes de começares, precisas de algo importante.",
