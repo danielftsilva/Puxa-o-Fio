@@ -8,14 +8,14 @@ app.secret_key = os.environ.get("SECRET_KEY", "puxa-o-fio-2024")
 CHECKPOINTS = {
     1: {
         "code": "PIRA",  # <- muda este código
-        "hint": "O agente secreto que iniciou tudo isto...",
+        "hint": "No armário elétrico do 737...",
         "location": "Inicio da missao",
         "description": "Encontra o primeiro código perto do início do caminho.",
         "success_msg": "Checkpoint 1 desbloqueado! Segue o fio..."
     },
     2: {
-        "code": "ARRÁBIDA",  # <- muda este código
-        "hint": "A serra que protege o vosso lar...",
+        "code": "10",  # <- muda este código
+        "hint": "Algumas pessoas chamam-lhe 'arte'... outras, 'vandalismo'...",
         "location": "Ringue de Futebol",
         "description": "Procura o código perto do ringue. Olha bem à tua volta.",
         "success_msg": "Checkpoint 2 desbloqueado! Quase lá..."
