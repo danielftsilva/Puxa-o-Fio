@@ -435,16 +435,16 @@
 			fill="none" stroke="#8b1a1a" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.85"/>
 
       <!-- Checkpoint 1 — near start (after first bend) -->
-      <g id="map-cp1" class="map-cp" data-cp="1" style="cursor:pointer">
+      <g id="map-cp2" class="map-cp" data-cp="2" style="cursor:pointer">
         <circle cx="200" cy="60" r="10" fill="#fff8ee" stroke="#8b1a1a" stroke-width="1.5"/>
-        <text x="200" y="64" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">I</text>
+        <text x="200" y="64" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">II</text>
         <circle cx="200" cy="60" r="14" fill="none" stroke="#8b1a1a" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
       </g>
 
       <!-- Checkpoint 2 — ringue area -->
-      <g id="map-cp2" class="map-cp" data-cp="2" style="cursor:pointer">
+      <g id="map-cp3" class="map-cp" data-cp="3" style="cursor:pointer">
         <circle cx="135" cy="148" r="10" fill="#fff8ee" stroke="#8b1a1a" stroke-width="1.5"/>
-        <text x="135" y="152" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">II</text>
+        <text x="135" y="152" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700" font-family="Cinzel,serif">III</text>
         <circle cx="135" cy="148" r="14" fill="none" stroke="#8b1a1a" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
       </g>
 
@@ -456,6 +456,12 @@
       </g>
 
       <!-- START flag -->
+	  <g id="map-cp0" class="map-cp" data-cp="1" style="cursor:pointer">
+		<circle cx="295" cy="60" r="10" fill="#fff8ee" stroke="#8b1a1a" stroke-width="1.5"/>
+		<text x="295" y="64" text-anchor="middle" font-size="10" fill="#8b1a1a" font-weight="700">I</text>
+		<circle cx="295" cy="60" r="14" fill="none" stroke="#8b1a1a" stroke-dasharray="2,2" opacity="0.5"/>
+	  </g>
+
       <g transform="translate(295,42)">
         <line x1="0" y1="0" x2="0" y2="-18" stroke="#704214" stroke-width="1.5"/>
         <polygon points="0,-18 12,-14 0,-10" fill="#8b1a1a"/>
@@ -482,37 +488,52 @@
   <!-- PROGRESS DOTS -->
   <div class="progress-section">
     <div class="progress-label">Progresso da Missão</div>
-    <div class="checkpoints-row">
-      <div class="cp-dot active" id="dot-1" onclick="scrollToCheckpoint(1)">I</div>
-      <div class="cp-line" id="line-1"></div>
-      <div class="cp-dot" id="dot-2" onclick="scrollToCheckpoint(2)">II</div>
-      <div class="cp-line" id="line-2"></div>
-      <div class="cp-dot" id="dot-3" onclick="scrollToCheckpoint(3)">✕</div>
-    </div>
-  </div>
+	<div class="checkpoints-row">
+	  <!-- I -->
+	  <div class="cp-dot active" id="dot-1" onclick="scrollToCheckpoint(1)">I</div>
+
+	  <div class="cp-line" id="line-1"></div>
+
+	  <!-- II -->
+	  <div class="cp-dot" id="dot-2" onclick="scrollToCheckpoint(2)">II</div>
+
+	  <div class="cp-line" id="line-2"></div>
+
+	  <!-- III -->
+	  <div class="cp-dot" id="dot-3" onclick="scrollToCheckpoint(3)">III</div>
+
+	  <div class="cp-line" id="line-3"></div>
+
+	  <!-- X -->
+	  <div class="cp-dot" id="dot-4" onclick="scrollToCheckpoint(4)">✕</div>
+	</div>
 
   <div class="divider">· · · ✦ · · ·</div>
 
   <!-- CHECKPOINT 1 -->
-  <div class="checkpoint-card visible" id="card-1">
-    <div class="cp-card-header">
-      <div class="cp-number">I</div>
-      <div>
-        <div class="cp-title">Checkpoint I</div>
-        <div class="cp-location" id="loc-1">—</div>
-      </div>
-    </div>
-    <div class="cp-desc" id="desc-1">A carregar...</div>
-    <div class="cp-hint">Pista: "<span id="hint-1">...</span>"</div>
-    <div class="code-input-row">
-      <input class="code-input" id="input-1" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
-      <button class="btn-confirm" onclick="submitCode(1)">✓</button>
-    </div>
-    <div class="cp-feedback" id="feedback-1"></div>
-  </div>
+  <!-- NOVO CHECKPOINT 1 -->
+	<div class="checkpoint-card visible" id="card-1">
+	  <div class="cp-card-header">
+		<div class="cp-number">I</div>
+		<div>
+		  <div class="cp-title">Checkpoint I</div>
+		  <div class="cp-location" id="loc-1">Início</div>
+		</div>
+	  </div>
+	  <div class="cp-desc" id="desc-1">
+		Antes de começares, precisas de algo importante.
+	  </div>
+	  <div class="cp-hint">
+		Pista: "<span id="hint-1">Leva o objeto que está na varanda...</span>"
+	  </div>
+	  <div class="code-input-row">
+		<input class="code-input" id="input-1" type="text" placeholder="Código secreto">
+		<button class="btn-confirm" onclick="submitCode(1)">✓</button>
+	  </div>
+	  <div class="cp-feedback" id="feedback-1"></div>
+	</div>
 
-  <!-- CHECKPOINT 2 -->
-  <div class="checkpoint-card locked" id="card-2">
+  <div class="checkpoint-card visible" id="card-2">
     <div class="cp-card-header">
       <div class="cp-number">II</div>
       <div>
@@ -520,8 +541,8 @@
         <div class="cp-location" id="loc-2">—</div>
       </div>
     </div>
-    <div class="cp-desc" id="desc-2">Completa o checkpoint anterior para desbloquear.</div>
-    <div class="cp-hint" style="display:none">Pista: "<span id="hint-2">...</span>"</div>
+    <div class="cp-desc" id="desc-2">A carregar...</div>
+    <div class="cp-hint">Pista: "<span id="hint-2">...</span>"</div>
     <div class="code-input-row">
       <input class="code-input" id="input-2" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
       <button class="btn-confirm" onclick="submitCode(2)">✓</button>
@@ -529,22 +550,40 @@
     <div class="cp-feedback" id="feedback-2"></div>
   </div>
 
-  <!-- CHECKPOINT 3 (X) -->
+  <!-- CHECKPOINT 2 -->
   <div class="checkpoint-card locked" id="card-3">
     <div class="cp-card-header">
-      <div class="cp-number">✕</div>
+      <div class="cp-number">III</div>
       <div>
-        <div class="cp-title">O Tesouro</div>
+        <div class="cp-title">Checkpoint III</div>
         <div class="cp-location" id="loc-3">—</div>
       </div>
     </div>
-    <div class="cp-desc" id="desc-3">Completa os checkpoints anteriores para desbloquear.</div>
+    <div class="cp-desc" id="desc-3">Completa o checkpoint anterior para desbloquear.</div>
     <div class="cp-hint" style="display:none">Pista: "<span id="hint-3">...</span>"</div>
     <div class="code-input-row">
       <input class="code-input" id="input-3" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
       <button class="btn-confirm" onclick="submitCode(3)">✓</button>
     </div>
     <div class="cp-feedback" id="feedback-3"></div>
+  </div>
+
+  <!-- CHECKPOINT 3 (X) -->
+  <div class="checkpoint-card locked" id="card-4">
+    <div class="cp-card-header">
+      <div class="cp-number">✕</div>
+      <div>
+        <div class="cp-title">O Tesouro</div>
+        <div class="cp-location" id="loc-4">—</div>
+      </div>
+    </div>
+    <div class="cp-desc" id="desc-4">Completa os checkpoints anteriores para desbloquear.</div>
+    <div class="cp-hint" style="display:none">Pista: "<span id="hint-4">...</span>"</div>
+    <div class="code-input-row">
+      <input class="code-input" id="input-4" type="text" placeholder="Código secreto" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn-confirm" onclick="submitCode(4)">✓</button>
+    </div>
+    <div class="cp-feedback" id="feedback-4"></div>
   </div>
 
   <!-- FINAL REVEAL -->
@@ -631,7 +670,7 @@
     const dot = document.getElementById(`dot-${n}`);
     dot.classList.remove('active');
     dot.classList.add('done');
-    if (n < 3) {
+    if (n < 4) {
       document.getElementById(`line-${n}`).classList.add('done');
     }
   }
@@ -674,7 +713,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadCheckpoint(1);
     // Handle Enter key
-    [1,2,3].forEach(n => {
+    [1,2,3,4].forEach(n => {
       document.getElementById(`input-${n}`)
         .addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(n); });
     });
